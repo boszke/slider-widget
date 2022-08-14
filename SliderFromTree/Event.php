@@ -1,41 +1,38 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Plugin\SliderFromTree;
 
 class Event
 {
-    public static function ipPageUpdated($data)
+    public static function ipPageUpdated(array $data): void
     {
-        if (ipRoute()->plugin() != 'Pages' || ipRoute()->action() != 'updatePage') {
+        if (ipRoute()->plugin() !== 'Pages' || ipRoute()->action() !== 'updatePage') {
             return; //we want to handle only page updates that are made from within Pages section.
         }
 
-        $pageId = $data['id'];
+        $pageId = (int)$data['id'];
         $pageStorage = ipPageStorage($pageId);
         $pageStorage->set('sftTitle', $data['sftTitle']);
         $pageStorage->set('sftSubtitle', $data['sftSubtitle']);
         $pageStorage->set('sftDescription', $data['sftDescription']);
     }
 
-    public static function ipPageDuplicated($data)
+    public static function ipPageDuplicated(array $data): void
     {
         $pageOldStorage = ipPageStorage($data['sourceId']);
         $values = $pageOldStorage->getAll();
-        $oldData = [
-            'sftTitle' => empty($values['sftTitle']) ? '' : $values['sftTitle'],
-            'sftSubtitle' => empty($values['sftSubtitle']) ? '' : $values['sftSubtitle'],
-            'sftDescription' => empty($values['sftDescription']) ? '' : $values['sftDescription'],
-        ];
 
         $pageStorage = ipPageStorage($data['id']);
-        $pageStorage->set('sftTitle', $oldData['sftTitle']);
-        $pageStorage->set('sftSubtitle', $oldData['sftSubtitle']);
-        $pageStorage->set('sftDescription', $oldData['sftDescription']);
+        $pageStorage->set('sftTitle', empty($values['sftTitle']) ? '' : $values['sftTitle']);
+        $pageStorage->set('sftSubtitle', empty($values['sftSubtitle']) ? '' : $values['sftSubtitle']);
+        $pageStorage->set('sftDescription', empty($values['sftDescription']) ? '' : $values['sftDescription']);
     }
-    
-    public static function ipBeforePageRemoved($data)
+
+    public static function ipBeforePageRemoved(array $data): void
     {
-        $pageId = $data['pageId'];
+        $pageId = (int)$data['pageId'];
         ipPageStorage($pageId)->remove('sftTitle');
         ipPageStorage($pageId)->remove('sftSubtitle');
         ipPageStorage($pageId)->remove('sftDescription');

@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Plugin\SliderFromTree;
 
 class Filter {
-    public static function ipPagePropertiesForm(\IP\Form $form, array $info)
+    public static function ipPagePropertiesForm(\IP\Form $form, array $info): \IP\Form
     {
         $values = ipPageStorage($info['pageId'])->getAll();
 
