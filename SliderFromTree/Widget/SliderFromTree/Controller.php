@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace Plugin\SliderFromTree\Widget\SliderFromTree;
 
+use Plugin\SliderFromTree\Widget\SliderFromTree\Services\ContentService;
+use Plugin\SliderFromTree\Widget\SliderFromTree\Services\OptionsService;
+use Plugin\SliderFromTree\Widget\SliderFromTree\Services\PageBannerService;
+use Plugin\SliderFromTree\Widget\SliderFromTree\Services\TextFieldsService;
+
 class Controller extends \Ip\WidgetController
 {
     public function getTitle(): string
@@ -30,26 +35,11 @@ class Controller extends \Ip\WidgetController
         $pages = [];
         if (isset($data['pageId'])) {
             $pageId = (int)$data['pageId'];
-            $parentPage = ipPage($pageId);
-            $children = $parentPage->getChildren();
-
-            foreach ($children as $page) {
-                $pageBanner = $this->getPageBanner($page->getId());
-                $pageStorage = ipPageStorage($page->getId())->getAll();
-
-                $pages[] = [
-                    'id'          => $page->getId(),
-                    'link'        => $page->getLink(),
-                    'title'       => empty($pageStorage['sftTitle']) ? $page->getTitle() : $pageStorage['sftTitle'],
-                    'image'       => $pageBanner,
-                    'subtitle'    => empty($pageStorage['sftSubtitle']) ? '' : $pageStorage['sftSubtitle'],
-                    'description' => empty($pageStorage['sftDescription']) ? '' : $pageStorage['sftDescription'],
-                ];
-            }
+            $contentService = new ContentService();
+            $pages = $contentService->getPagesContent($pageId, new PageBannerService());
 
             if (!empty($data['showButton'])) {
-                $redirectUrl = $parentPage->getRedirectUrl();
-                $data['showButton'] = empty($redirectUrl) ? $parentPage->getLink() : $redirectUrl;
+                $data['showButton'] = $contentService->getRedirectUrl($pageId);
             }
         }
 
@@ -58,54 +48,19 @@ class Controller extends \Ip\WidgetController
         return parent::generateHtml($revisionId, $widgetId, $data, $skin);
     }
 
-    private function getPageBanner(int $pageId): string
-    {
-        $pageBanner = ipPageStorage($pageId)->get('PageBanner');
-
-        $transformSmall = [
-            'type'   => 'fit',
-            'width'  => 800,
-            'height' => 800,
-            'forced' => false,
-        ];
-
-        return empty($pageBanner) ? '' : ipFileUrl(ipReflection($pageBanner[0], $transformSmall));
-    }
-
     public function update(int $widgetId, array $postData, array $currentData): array
     {
         if (isset($postData['method'])) {
+            if (!isset($postData)) {
+                throw new \Ip\Exception("Missing required parameter");
+            }
+
             switch ($postData['method']) {
                 case 'saveOptions':
-                    if (!isset($postData)) {
-                        throw new \Ip\Exception("Missing required parameter");
-                    }
-
-                    if (isset($postData['pageId'])) {
-                        $currentData['pageId'] = $postData['pageId'];
-                    }
-                    if (isset($postData['pageTitle'])) {
-                        $currentData['pageTitle'] = $postData['pageTitle'];
-                    }
-                    if (isset($postData['showButton'])) {
-                        $currentData['showButton'] = (int)$postData['showButton'];
-                    }
-
-                    break;
+                    return (new OptionsService())->update($postData, $currentData);
                 case 'saveTextFields':
-                    if (!isset($postData)) {
-                        throw new \Ip\Exception("Missing required parameter");
-                    }
-
-                    $currentData['text'] = [
-                        'header'      => $postData['text']['header'],
-                        'description' => $postData['text']['description'],
-                    ];
-
-                    break;
+                    return (new TextFieldsService())->update($postData, $currentData);
             }
         }
-
-        return $currentData;
     }
 }
