@@ -1,15 +1,9 @@
 <?php
-/**
- * @package ImpressPages
- *
- */
-namespace Plugin\SliderFromTree\Widget\SliderFromTree;
 
+namespace Plugin\SliderFromTree\Widget\SliderFromTree;
 
 class Controller extends \Ip\WidgetController
 {
-
-
     public function getTitle()
     {
         return __('Slider From Tree', 'SliderFromTree', false);
@@ -120,5 +114,4 @@ class Controller extends \Ip\WidgetController
         
         return $currentData;
     }
-
 }

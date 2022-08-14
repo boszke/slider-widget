@@ -1,25 +1,12 @@
 <?php
-/**
- * @package   ImpressPages
- */
-
 
 namespace Plugin\SliderFromTree;
 
-
 class Filter {
-
-    /**
-     * @param \Ip\Form $form
-     * @return mixed
-     */
-    
-    //Plugin View in admin (page settings)
-    public static function ipPagePropertiesForm($form, $info)
+    public static function ipPagePropertiesForm(\IP\Form $form, array $info)
     {
         $values = ipPageStorage($info['pageId'])->getAll();
 
-        //create form
         $fieldset = new \Ip\Form\Fieldset(__('Fields displayed in sliders', 'SliderFromTree', false));
         $form->addFieldset($fieldset);
 

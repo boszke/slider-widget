@@ -1,15 +1,4 @@
 <?php
-/**
- * @package   ImpressPages
- */
-
-
-/**
- * Created by PhpStorm.
- * User: mangirdas
- * Date: 14.9.21
- * Time: 23.39
- */
 
 namespace Plugin\SliderFromTree;
 
